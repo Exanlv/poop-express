@@ -1,0 +1,18 @@
+{
+    "name": "exan/poopexpress",
+    "description": "A crappy router you shouldn't use",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Exan\\PoopExpress\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Exanlv",
+            "email": "exan@landviz.nl"
+        }
+    ],
+    "require": {}
+}

@@ -1,5 +1,7 @@
 <?php
 
+namespace Exan\PoopExpress;
+
 class PoopExpress
 {
     private bool $routeMatch = false;

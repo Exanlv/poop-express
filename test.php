@@ -1,6 +1,8 @@
 <?php
 
-require_once './src/PoopExpress.php';
+use Exan\PoopExpress\PoopExpress;
+
+require_once 'vendor/autoload.php';
 
 $start = microtime(true);
 
