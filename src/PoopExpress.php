@@ -5,22 +5,16 @@ namespace Exan\PoopExpress;
 class PoopExpress
 {
     private array $parts = [];
-    private int $partsCount;
 
     public function __construct(
         private readonly string $method,
         string $uri,
     ) {
         $this->parts = explode('/', substr($uri, 1));
-        $this->partsCount = count($this->parts);
     }
 
     public function attempt(array $uri, array $handlers): bool
     {
-        if ($this->partsCount !== count($uri)) {
-            return false;
-        }
-
         foreach ($uri as $key => $part) {
             if ($part === '*') {
                 $wildcards[] = $this->parts[$key];
