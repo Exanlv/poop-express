@@ -14,35 +14,32 @@ $router = new PoopExpress($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
 
 You then attempt routes, rather than registering them
 ```php
-$router->attempt('GET', '/^\/$/', function () {
+$router->attempt([''], ['GET', function () {
     echo 'Home page';
-}) || $router->attempt('GET', '/^\/somewhere-else$/', function () {
+}]) || $router->attempt(['somewhere-else'], ['GET' => function () {
     echo 'This is a different page';
-}) || $router->default();
+}]);
 ```
-This gives you 2 endpoints, with automatic 404/405 handling:
+This gives you 2 endpoints, with automatic 405 handling:
 - `/`
 - `/somewhere-else`
 
 Dynamic routes are an option
 ```php
-$router->attempt('GET', '/^\/group\/(\d*?)$/', function ($id) {
+$router->attempt(['group', '*'], ['GET' => function ($id) {
     echo 'This page is within the "group", ', $id;
-})
+}]);
 ```
 
 And for optimal performance, use this garbage syntax to seperate your routes into groups:
 ```php
 (
-    $router->group('/^\/group\//') &&
-    (
-        $router->attempt('GET', '/^\/group\/(\d*?)$/', function ($id) {
-            echo 'This page is within the "group", ', $id;
-        }) || $router->attempt('GET', '/^\/group\/some-other-group$/', function () {
+    $router->group(['group']) && (
+        $router->attempt(['group', 'nowhere'], ['GET' => function () {
             echo 'This page is also within the "group"';
-        }) || $router->attempt('POST', '/^\/group\/nowhere$/', function () {
-            echo 'This page is also within the "group"';
-        })
+        }]) || $router->attempt(['group', 'some-other-group'], ['POST' => function () {
+            echo 'This page is yet again within the "group"';
+        }])
     )
 )
 ```
@@ -51,24 +48,26 @@ All together:
 ```php
 $router = new PoopExpress($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
 
-$router->attempt('GET', '/^\/$/', function () {
+$router->attempt([''], ['GET', function () {
     echo 'Home page';
-}) || $router->attempt('GET', '/^\/somewhere-else$/', function () {
+}]) || $router->attempt(['somewhere-else'], ['GET' => function () {
     echo 'This is a different page';
-}) || (
-    $router->group('/^\/group\//') &&
-    (
-        $router->attempt('GET', '/^\/group\/(\d*?)$/', function ($id) {
+}]) || (
+    $router->group(['group']) && (
+        $router->attempt(['group', 'nowhere'], ['GET' => function () {
+            echo 'This page is also within the "group"';
+        }]) || $router->attempt(['group', 'some-other-group'], ['POST' => function () {
+            echo 'This page is yet again within the "group"';
+        }]) || $router->attempt(['group', '*'], ['GET' => function ($id) {
             echo 'This page is within the "group", ', $id;
-        }) || $router->attempt('GET', '/^\/group\/some-other-group$/', function () {
-            echo 'This page is also within the "group"';
-        }) || $router->attempt('POST', '/^\/group\/nowhere$/', function () {
-            echo 'This page is also within the "group"';
-        })
+        }])
     )
-) || $router->attempt('GET', '/^\/not-group\/page$/', function () {
+) || $router->attempt(['not-group', 'page'], ['GET' => function () {
     echo 'This is no longer in the group';
-}) || $router->default();
+}]) || (function () {
+    http_response_code(404);
+    echo '404';
+})();
 ```
 
 ### How is this fast?
