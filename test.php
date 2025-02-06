@@ -2,29 +2,30 @@
 
 use Exan\PoopExpress\PoopExpress;
 
-require_once 'vendor/autoload.php';
+require_once './vendor/autoload.php';
 
 $start = microtime(true);
 
 ob_start();
 
 for ($i = 0; $i < 100000; $i++) {
-    $router = new PoopExpress('GET', '/not-group/page');
+    $router = new PoopExpress('GET', '/somewhere-else');
 
-    $router->attempt('GET', '/^\/$/', function () {
+    $router->attempt('GET', [''], function () {
         echo 'Home page';
-    }) || $router->attempt('GET', '/^\/somewhere-else$/', function () {
+    }) || $router->attempt('GET', ['somewhere-else'], function () {
         echo 'This is a different page';
     }) || (
-        $router->group('/^\/group\//') &&
-        (
-            $router->attempt('GET', '/^\/group\/(\d*?)$/', function ($id) {
-                echo 'This page is within the "group", ', $id;
-            }) || $router->attempt('GET', '/^\/group\/some-other-group$/', function () {
+        $router->group(['group']) && (
+            $router->attempt('GET', ['group', 'nowhere'], function () {
                 echo 'This page is also within the "group"';
+            }) || $router->attempt('GET', ['group', 'some-other-group'], function () {
+                echo 'This page is yet again within the "group"';
+            }) || $router->attempt('GET', ['group', '*'], function ($id) {
+                echo 'This page is within the "group", ', $id;
             })
         )
-    ) || $router->attempt('GET', '/^\/not-group\/page$/', function () {
+    ) || $router->attempt('GET', ['not-group', 'page'], function () {
         echo 'This is no longer in the group';
     }) || $router->default();
 
