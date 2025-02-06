@@ -4,21 +4,20 @@ namespace Exan\PoopExpress;
 
 class PoopExpress
 {
-    private bool $routeMatch = false;
-
     private array $parts = [];
+    private int $partsCount;
 
     public function __construct(
         private readonly string $method,
         string $uri,
     ) {
-        $this->parts = explode('/', $uri);
-        array_shift($this->parts);
+        $this->parts = explode('/', substr($uri, 1));
+        $this->partsCount = count($this->parts);
     }
 
-    public function attempt(string $method, array $uri, callable $handler): bool
+    public function attempt(array $uri, array $handlers): bool
     {
-        if (count($this->parts) !== count($uri)) {
+        if ($this->partsCount !== count($uri)) {
             return false;
         }
 
@@ -33,12 +32,11 @@ class PoopExpress
             }
         }
 
-        if ($method !== $this->method) {
-            $this->routeMatch = true;
-            return false;
-        }
+        ($handlers[$this->method] ?? function () {
+            http_response_code(405);
+            echo '405';
+        })(...($wildcards ?? []));
 
-        $handler(...($wildcards ?? []));
         return true;
     }
 
@@ -55,14 +53,5 @@ class PoopExpress
         }
 
         return true;
-    }
-
-    public function default()
-    {
-        $code = $this->routeMatch ? 405 : 404;
-
-        http_response_code($code);
-
-        echo $code;
     }
 }

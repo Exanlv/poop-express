@@ -11,23 +11,26 @@ ob_start();
 for ($i = 0; $i < 100000; $i++) {
     $router = new PoopExpress('GET', '/somewhere-else');
 
-    $router->attempt('GET', [''], function () {
+    $router->attempt([''], ['GET', function () {
         echo 'Home page';
-    }) || $router->attempt('GET', ['somewhere-else'], function () {
+    }]) || $router->attempt(['somewhere-else'], ['GET' => function () {
         echo 'This is a different page';
-    }) || (
+    }]) || (
         $router->group(['group']) && (
-            $router->attempt('GET', ['group', 'nowhere'], function () {
+            $router->attempt(['group', 'nowhere'], ['GET', function () {
                 echo 'This page is also within the "group"';
-            }) || $router->attempt('GET', ['group', 'some-other-group'], function () {
+            }]) || $router->attempt(['group', 'some-other-group'], ['POST' => function () {
                 echo 'This page is yet again within the "group"';
-            }) || $router->attempt('GET', ['group', '*'], function ($id) {
+            }]) || $router->attempt(['group', '*'], ['GET' => function ($id) {
                 echo 'This page is within the "group", ', $id;
-            })
+            }])
         )
-    ) || $router->attempt('GET', ['not-group', 'page'], function () {
+    ) || $router->attempt(['not-group', 'page'], ['GET' => function () {
         echo 'This is no longer in the group';
-    }) || $router->default();
+    }]) || (function () {
+        http_response_code(404);
+        echo '404';
+    })();
 
     ob_clean();
 }
